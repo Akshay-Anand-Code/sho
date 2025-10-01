@@ -1,0 +1,1277 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SHOOVO</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@300;400;500;600;700&display=swap');
+        
+        :root {
+            --bg-primary: #0a0a0a;
+            --bg-secondary: #121212;
+            --bg-elevated: #1a1a1a;
+            --fg-primary: #7dd3fc;
+            --fg-secondary: #6ee7b7;
+            --fg-accent: #a78bfa;
+            --fg-warning: #fbbf24;
+            --fg-error: #ef4444;
+            --fg-muted: #9ca3af;
+            --fg-dim: #6b7280;
+            --border-neon: #7dd3fc;
+            --border-cyan: #6ee7b7;
+            --border-magenta: #a78bfa;
+            --glow-green: 0 0 10px rgba(110, 231, 183, 0.3), 0 0 20px rgba(110, 231, 183, 0.2);
+            --glow-cyan: 0 0 10px rgba(125, 211, 252, 0.3), 0 0 20px rgba(125, 211, 252, 0.2);
+            --glow-magenta: 0 0 10px rgba(167, 139, 250, 0.3), 0 0 20px rgba(167, 139, 250, 0.2);
+            --grid-size: 2px;
+            --scanline-opacity: 0.02;
+        }
+
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'JetBrains Mono', 'SF Mono', Monaco, 'Cascadia Code', 'Roboto Mono', Consolas, 'Courier New', monospace;
+            margin: 0;
+            padding: 0;
+            background: var(--bg-primary);
+            min-height: 100vh;
+            color: var(--fg-primary);
+            line-height: 1.4;
+            font-weight: 400;
+            overflow-x: hidden;
+        }
+
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: 
+                linear-gradient(90deg, transparent 49%, rgba(0, 255, 65, var(--scanline-opacity)) 50%, transparent 51%),
+                linear-gradient(0deg, transparent 49%, rgba(0, 255, 65, 0.02) 50%, transparent 51%);
+            background-size: var(--grid-size) var(--grid-size);
+            pointer-events: none;
+            z-index: 1;
+            animation: scanlines 4s linear infinite;
+        }
+
+        body::after {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: 
+                radial-gradient(ellipse at center, transparent 0%, rgba(0, 0, 0, 0.4) 100%),
+                linear-gradient(90deg, transparent 98%, rgba(125, 211, 252, 0.01) 100%);
+            pointer-events: none;
+            z-index: 2;
+            animation: staticNoise 3s infinite;
+        }
+
+        .matrix-bg {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+            z-index: 0;
+            pointer-events: none;
+        }
+
+        .matrix-column {
+            position: absolute;
+            top: -100vh;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 14px;
+            color: var(--fg-primary);
+            opacity: 0.05;
+            white-space: pre;
+            animation: matrixRain linear infinite;
+            text-shadow: 0 0 3px currentColor;
+        }
+
+        .data-stream {
+            position: absolute;
+            height: 1px;
+            background: linear-gradient(90deg, transparent 0%, var(--fg-secondary) 50%, transparent 100%);
+            animation: dataStream 3s linear infinite;
+        }
+
+        .network-node {
+            position: absolute;
+            width: 4px;
+            height: 4px;
+            background: var(--fg-primary);
+            border-radius: 50%;
+            box-shadow: 0 0 10px currentColor;
+            animation: networkNodes 8s infinite ease-in-out;
+        }
+
+        .hologram-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(
+                45deg,
+                transparent 48%,
+                rgba(0, 255, 255, 0.02) 50%,
+                transparent 52%
+            );
+            background-size: 20px 20px;
+            animation: dataStream 10s linear infinite;
+            pointer-events: none;
+        }
+
+        @keyframes scanlines {
+            0% { transform: translateY(0); }
+            100% { transform: translateY(var(--grid-size)); }
+        }
+
+        @keyframes blink {
+            0%, 50% { opacity: 1; }
+            51%, 100% { opacity: 0; }
+        }
+
+        @keyframes glowPulse {
+            0%, 100% { text-shadow: var(--glow-green); }
+            50% { text-shadow: var(--glow-green), 0 0 50px #00ff41; }
+        }
+
+        @keyframes flicker {
+            0%, 100% { opacity: 1; }
+            1%, 3%, 5% { opacity: 0.9; }
+            2%, 4% { opacity: 0.95; }
+        }
+
+        @keyframes processing {
+            0% { content: "processing"; }
+            25% { content: "processing."; }
+            50% { content: "processing.."; }
+            75% { content: "processing..."; }
+            100% { content: "processing"; }
+        }
+
+        @keyframes matrixRain {
+            0% { transform: translateY(-100vh); opacity: 0; }
+            10% { opacity: 1; }
+            90% { opacity: 1; }
+            100% { transform: translateY(100vh); opacity: 0; }
+        }
+
+        @keyframes dataStream {
+            0% { transform: translateX(-100%); }
+            100% { transform: translateX(100%); }
+        }
+
+        @keyframes networkPulse {
+            0%, 100% { 
+                box-shadow: 0 0 20px rgba(125, 211, 252, 0.15);
+            }
+            50% { 
+                box-shadow: 0 0 30px rgba(125, 211, 252, 0.25);
+            }
+        }
+
+
+        @keyframes glitchText {
+            0%, 100% { transform: translate(0); }
+            10% { transform: translate(-2px, -2px); }
+            20% { transform: translate(2px, 2px); }
+            30% { transform: translate(-2px, 2px); }
+            40% { transform: translate(2px, -2px); }
+            50% { transform: translate(-1px, 1px); }
+            60% { transform: translate(1px, -1px); }
+            70% { transform: translate(-1px, -1px); }
+            80% { transform: translate(1px, 1px); }
+            90% { transform: translate(-1px, 1px); }
+        }
+
+        @keyframes staticNoise {
+            0%, 100% { opacity: 0.05; }
+            50% { opacity: 0.15; }
+        }
+
+        @keyframes terminalBoot {
+            0% { 
+                opacity: 0; 
+                transform: scale(0.8); 
+                filter: brightness(0);
+            }
+            50% { 
+                opacity: 0.7; 
+                transform: scale(1.02); 
+                filter: brightness(1.2);
+            }
+            100% { 
+                opacity: 1; 
+                transform: scale(1); 
+                filter: brightness(1);
+            }
+        }
+
+        @keyframes networkNodes {
+            0%, 100% { 
+                transform: rotate(0deg); 
+                opacity: 0.6;
+            }
+            25% { 
+                transform: rotate(90deg); 
+                opacity: 1;
+            }
+            50% { 
+                transform: rotate(180deg); 
+                opacity: 0.8;
+            }
+            75% { 
+                transform: rotate(270deg); 
+                opacity: 1;
+            }
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 20px;
+            position: relative;
+            z-index: 3;
+        }
+
+        .terminal-window {
+            background: var(--bg-secondary);
+            border: 2px solid var(--border-neon);
+            border-radius: 8px;
+            box-shadow: 
+                var(--glow-cyan), 
+                inset 0 1px 0 rgba(125, 211, 252, 0.1);
+            margin-bottom: 24px;
+            overflow: hidden;
+            position: relative;
+            animation: terminalBoot 2s ease-out;
+        }
+
+        .terminal-window::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: 
+                linear-gradient(135deg, transparent 0%, rgba(125, 211, 252, 0.03) 50%, transparent 100%),
+                repeating-linear-gradient(
+                    90deg,
+                    transparent 0px,
+                    rgba(125, 211, 252, 0.01) 1px,
+                    transparent 2px
+                );
+            pointer-events: none;
+            z-index: 1;
+        }
+
+        .terminal-window::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 200%;
+            height: 100%;
+            background: linear-gradient(
+                90deg, 
+                transparent 0%, 
+                rgba(125, 211, 252, 0.05) 50%, 
+                transparent 100%
+            );
+            animation: dataStream 15s linear infinite;
+            pointer-events: none;
+            z-index: 2;
+        }
+
+        .terminal-header {
+            background: linear-gradient(90deg, var(--bg-elevated) 0%, rgba(0, 255, 65, 0.1) 100%);
+            padding: 12px 16px;
+            border-bottom: 1px solid var(--border-neon);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .terminal-dots {
+            display: flex;
+            gap: 6px;
+        }
+
+        .terminal-dot {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            background: var(--fg-error);
+            box-shadow: 0 0 5px currentColor;
+        }
+
+        .terminal-dot:nth-child(2) {
+            background: var(--fg-warning);
+        }
+
+        .terminal-dot:nth-child(3) {
+            background: var(--fg-primary);
+        }
+
+        .terminal-title {
+            margin-left: 12px;
+            font-size: 12px;
+            color: var(--fg-muted);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .terminal-content {
+            padding: 24px;
+            position: relative;
+            z-index: 3;
+        }
+
+        .interactive-terminal {
+            background: var(--bg-primary);
+            border: 1px solid var(--border-cyan);
+            border-radius: 4px;
+            padding: 16px;
+            margin: 16px 0;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .interactive-terminal::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 2px;
+            background: linear-gradient(90deg, var(--fg-primary), var(--fg-secondary), var(--fg-accent));
+            animation: dataStream 2s linear infinite;
+        }
+
+        .code-block {
+            background: var(--bg-elevated);
+            border: 1px solid var(--border-neon);
+            border-radius: 4px;
+            padding: 16px;
+            margin: 12px 0;
+            font-family: inherit;
+            position: relative;
+            overflow: hidden;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .code-block:hover {
+            box-shadow: var(--glow-green);
+            border-color: var(--border-cyan);
+        }
+
+        .code-block::before {
+            content: 'COPY';
+            position: absolute;
+            top: 8px;
+            right: 8px;
+            font-size: 10px;
+            color: var(--fg-dim);
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+
+        .code-block:hover::before {
+            opacity: 1;
+        }
+
+        .glitch-text {
+            animation: glitchText 0.3s ease-in-out;
+        }
+
+        .live-stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 16px;
+            margin: 20px 0;
+        }
+
+        .stat-card {
+            background: var(--bg-primary);
+            border: 1px solid var(--border-cyan);
+            border-radius: 4px;
+            padding: 16px;
+            position: relative;
+            overflow: hidden;
+            transition: all 0.3s ease;
+        }
+
+        .stat-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(0, 255, 255, 0.1), transparent);
+            transition: left 0.5s ease;
+        }
+
+        .stat-card:hover::before {
+            left: 100%;
+        }
+
+        .stat-card:hover {
+            border-color: var(--border-neon);
+            box-shadow: var(--glow-cyan);
+        }
+
+        .typing-effect {
+            overflow: hidden;
+            white-space: nowrap;
+            margin: 0;
+            animation: typing 3s steps(30, end), blink 0.75s step-end infinite;
+        }
+
+        @keyframes typing {
+            from { width: 0; }
+            to { width: 100%; }
+        }
+
+        .header-ascii {
+            text-align: center;
+            margin-bottom: 32px;
+        }
+
+        .ascii-art {
+            font-size: 12px;
+            line-height: 1;
+            color: var(--fg-secondary);
+            text-shadow: var(--glow-cyan);
+            white-space: pre;
+            animation: flicker 8s infinite;
+        }
+
+        .nav {
+            background: var(--bg-elevated);
+            border: 1px solid var(--border-cyan);
+            border-radius: 4px;
+            padding: 8px;
+            margin-bottom: 24px;
+            display: flex;
+            justify-content: center;
+            gap: 2px;
+            box-shadow: 0 0 15px rgba(0, 255, 255, 0.2);
+        }
+
+        .nav a {
+            text-decoration: none;
+            color: var(--fg-secondary);
+            padding: 10px 20px;
+            border-radius: 2px;
+            transition: all 0.2s ease;
+            font-weight: 500;
+            font-size: 13px;
+            letter-spacing: 0.5px;
+            text-transform: uppercase;
+            border: 1px solid transparent;
+        }
+
+        .nav a:hover {
+            background: rgba(0, 255, 255, 0.1);
+            border-color: var(--border-cyan);
+            text-shadow: var(--glow-cyan);
+            transform: translateY(-1px);
+        }
+
+        .nav a.active {
+            background: rgba(0, 255, 255, 0.15);
+            border-color: var(--border-cyan);
+            text-shadow: var(--glow-cyan);
+        }
+
+        .prompt {
+            font-family: inherit;
+            margin: 16px 0;
+            display: flex;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 4px;
+        }
+
+        .prompt::before {
+            content: "root@solana-bot:~$ ";
+            color: var(--fg-primary);
+            text-shadow: var(--glow-green);
+        }
+
+        .cursor-blink {
+            animation: blink 1s infinite;
+            color: var(--fg-primary);
+            text-shadow: var(--glow-green);
+        }
+
+        .content h2 {
+            margin: 0 0 20px 0;
+            font-size: 18px;
+            font-weight: 600;
+            color: var(--fg-secondary);
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            text-shadow: var(--glow-cyan);
+            border-bottom: 1px solid var(--border-cyan);
+            padding-bottom: 8px;
+        }
+
+        .content h3 {
+            margin: 0 0 12px 0;
+            font-size: 15px;
+            font-weight: 600;
+            color: var(--fg-primary);
+            text-shadow: var(--glow-green);
+        }
+
+        .ansi-green { color: var(--fg-primary); text-shadow: var(--glow-green); }
+        .ansi-cyan { color: var(--fg-secondary); text-shadow: var(--glow-cyan); }
+        .ansi-magenta { color: var(--fg-accent); text-shadow: var(--glow-magenta); }
+        .ansi-yellow { color: var(--fg-warning); text-shadow: 0 0 10px var(--fg-warning); }
+        .ansi-red { color: var(--fg-error); text-shadow: 0 0 10px var(--fg-error); }
+
+        .glow { text-shadow: var(--glow-green); }
+        .glow-cyan { text-shadow: var(--glow-cyan); }
+        .glow-magenta { text-shadow: var(--glow-magenta); }
+
+        .border-neon {
+            border: 1px solid var(--border-neon);
+            box-shadow: 0 0 10px rgba(0, 255, 65, 0.3);
+        }
+
+        .status-badge {
+            display: inline-block;
+            padding: 4px 12px;
+            border-radius: 2px;
+            font-size: 10px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            border: 1px solid;
+            font-family: inherit;
+        }
+
+        .status-success { 
+            background: rgba(0, 255, 65, 0.1); 
+            color: var(--fg-primary); 
+            border-color: var(--border-neon);
+            text-shadow: var(--glow-green);
+        }
+
+        .status-failed { 
+            background: rgba(255, 0, 102, 0.1); 
+            color: var(--fg-error); 
+            border-color: var(--fg-error);
+            text-shadow: 0 0 10px var(--fg-error);
+        }
+
+        .status-pending { 
+            background: rgba(255, 255, 0, 0.1); 
+            color: var(--fg-warning); 
+            border-color: var(--fg-warning);
+            text-shadow: 0 0 10px var(--fg-warning);
+        }
+
+        .status-processing { 
+            background: rgba(0, 255, 255, 0.1); 
+            color: var(--fg-secondary); 
+            border-color: var(--border-cyan);
+            text-shadow: var(--glow-cyan);
+            animation: glowPulse 2s infinite;
+        }
+
+        .status-processing::after {
+            content: "processing";
+            animation: processing 1.5s infinite;
+        }
+
+        .balance {
+            font-size: 32px;
+            font-weight: 700;
+            color: var(--fg-primary);
+            margin: 16px 0;
+            letter-spacing: 2px;
+            text-shadow: var(--glow-green);
+            animation: glowPulse 3s infinite;
+        }
+
+        .transaction-item {
+            background: var(--bg-primary);
+            border: 1px solid var(--border-cyan);
+            border-radius: 4px;
+            padding: 16px;
+            margin: 12px 0;
+            border-left: 3px solid var(--border-neon);
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .transaction-item::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(0, 255, 65, 0.1), transparent);
+            transition: left 0.5s ease;
+        }
+
+        .transaction-item:hover::before {
+            left: 100%;
+        }
+
+        .transaction-item:hover {
+            border-color: var(--border-neon);
+            box-shadow: var(--glow-green);
+            transform: translateX(4px);
+        }
+
+        .leaderboard-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 16px;
+            background: var(--bg-primary);
+            border: 1px solid var(--border-magenta);
+            border-radius: 4px;
+            margin: 12px 0;
+            transition: all 0.3s ease;
+            position: relative;
+        }
+
+        .leaderboard-item:hover {
+            border-color: var(--border-neon);
+            box-shadow: var(--glow-magenta);
+            transform: scale(1.02);
+        }
+
+        .leaderboard-rank {
+            color: var(--fg-accent);
+            font-weight: 700;
+            text-shadow: var(--glow-magenta);
+            min-width: 40px;
+        }
+
+        .amount {
+            font-weight: 700;
+            color: var(--fg-primary);
+            text-shadow: var(--glow-green);
+            font-family: inherit;
+        }
+
+        .footer {
+            text-align: center;
+            padding: 32px 0;
+            color: var(--fg-dim);
+            font-size: 12px;
+            border-top: 1px solid var(--border-cyan);
+            margin-top: 48px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        code {
+            background: var(--bg-elevated);
+            color: var(--fg-primary);
+            padding: 8px 12px;
+            border-radius: 2px;
+            font-family: inherit;
+            font-size: 12px;
+            border: 1px solid var(--border-neon);
+            text-shadow: var(--glow-green);
+            display: inline-block;
+            position: relative;
+            cursor: pointer;
+        }
+
+        code:hover {
+            box-shadow: var(--glow-green);
+        }
+
+        .terminal-log {
+            background: var(--bg-primary);
+            border: 1px solid var(--border-cyan);
+            border-radius: 4px;
+            padding: 20px;
+            margin: 20px 0;
+            font-family: inherit;
+            position: relative;
+        }
+
+        .terminal-log::before {
+            content: "SYSTEM LOG";
+            position: absolute;
+            top: -8px;
+            left: 16px;
+            background: var(--bg-secondary);
+            padding: 0 8px;
+            font-size: 10px;
+            color: var(--fg-secondary);
+            text-shadow: var(--glow-cyan);
+            letter-spacing: 1px;
+        }
+
+        .log-entry {
+            display: flex;
+            margin: 8px 0;
+            font-size: 13px;
+        }
+
+        .log-timestamp {
+            color: var(--fg-dim);
+            margin-right: 12px;
+            min-width: 80px;
+        }
+
+        .log-level {
+            margin-right: 12px;
+            min-width: 60px;
+            font-weight: 600;
+        }
+
+        .log-level.info { color: var(--fg-secondary); }
+        .log-level.success { color: var(--fg-primary); }
+        .log-level.warn { color: var(--fg-warning); }
+        .log-level.error { color: var(--fg-error); }
+
+        .kbd {
+            background: var(--bg-elevated);
+            border: 1px solid var(--border-neon);
+            border-radius: 2px;
+            padding: 2px 6px;
+            font-size: 11px;
+            color: var(--fg-primary);
+            text-shadow: var(--glow-green);
+            box-shadow: inset 0 -1px 0 rgba(0, 255, 65, 0.5);
+        }
+
+        a {
+            color: var(--fg-secondary);
+            text-decoration: none;
+            transition: all 0.2s ease;
+            text-shadow: var(--glow-cyan);
+        }
+
+        a:hover {
+            color: var(--fg-primary);
+            text-shadow: var(--glow-green);
+        }
+
+        ul {
+            margin: 0;
+            padding-left: 20px;
+        }
+
+        li {
+            margin: 6px 0;
+            color: var(--fg-muted);
+        }
+
+        li::marker {
+            color: var(--fg-secondary);
+        }
+
+        p {
+            color: var(--fg-muted);
+            margin: 12px 0;
+        }
+
+        strong {
+            color: var(--fg-primary);
+            font-weight: 600;
+            text-shadow: var(--glow-green);
+        }
+
+        @media (prefers-reduced-motion: reduce) {
+            *, *::before, *::after {
+                animation-duration: 0.01ms !important;
+                animation-iteration-count: 1 !important;
+                transition-duration: 0.01ms !important;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .container { padding: 12px; }
+            .terminal-content { padding: 16px; }
+            .ascii-art { font-size: 8px; }
+            .nav { flex-direction: column; gap: 4px; }
+            .nav a { text-align: center; }
+        }
+    </style>
+</head>
+<body>
+    <div class="matrix-bg" id="matrixBg"></div>
+    
+    <div class="container">
+        <div class="header-ascii">
+            <pre class="ascii-art">
+███████ ██   ██  ██████   ██████  ██    ██  ██████  
+██      ██   ██ ██    ██ ██    ██ ██    ██ ██    ██ 
+███████ ███████ ██    ██ ██    ██ ██    ██ ██    ██ 
+     ██ ██   ██ ██    ██ ██    ██  ██  ██  ██    ██ 
+███████ ██   ██  ██████   ██████    ████    ██████  
+            </pre>
+            <div class="prompt">
+                INITIALIZING SHOOVO PAYMENT PROTOCOL...
+                <span class="cursor-blink">█</span>
+            </div>
+        </div>
+        
+        <div class="nav">
+            <a href="index.html" class="nav-btn">
+                <span class="ansi-cyan">></span> HOME
+            </a>
+            <a href="send.html" class="nav-btn">
+                <span class="ansi-green">></span> SEND
+            </a>
+            <a href="register.html" class="nav-btn">
+                <span class="ansi-magenta">></span> REGISTER
+            </a>
+            <a href="transactions.html" class="nav-btn">
+                <span class="ansi-cyan">></span> TRANSACTIONS
+            </a>
+            <a href="leaderboard.html" class="nav-btn">
+                <span class="ansi-yellow">></span> LEADERBOARD
+            </a>
+        </div>
+        
+        <div class="terminal-window">
+            <div class="terminal-header">
+                <div class="terminal-dots">
+                    <div class="terminal-dot"></div>
+                    <div class="terminal-dot"></div>
+                    <div class="terminal-dot"></div>
+                </div>
+                <div class="terminal-title">SHOOVO_v2.1.0</div>
+                <div style="margin-left: auto; display: flex; align-items: center; gap: 16px;">
+                    <div class="network-status" id="networkStatus">
+                        <span class="ansi-green">●</span>
+                        <span style="font-size: 10px;">ONLINE</span>
+                    </div>
+                    <div class="live-balance" id="liveBalance">
+                        <span class="ansi-yellow">◎</span>
+                        <span style="font-size: 10px;" id="balanceDisplay">0.0000</span>
+                    </div>
+                    <div class="wallet-status" id="walletConnector">
+                        <button id="connectWallet" style="background: var(--bg-elevated); border: 1px solid var(--border-neon); color: var(--fg-primary); padding: 4px 8px; border-radius: 2px; font-family: inherit; font-size: 9px; cursor: pointer;">
+                            CONNECT_WALLET
+                        </button>
+                    </div>
+                </div>
+            </div>
+            <div class="hologram-overlay"></div>
+            <div class="terminal-content">
+                
+<div class="terminal-log">
+    <div class="log-entry">
+        <span class="log-timestamp ansi-cyan">[15:42:08]</span>
+        <span class="log-level success ansi-green">[SYSTEM]</span>
+        <span>SHOOVO_v2.1.0 INITIALIZED</span>
+    </div>
+    <div class="log-entry">
+        <span class="log-timestamp ansi-cyan">[15:42:10]</span>
+        <span class="log-level success ansi-green">[BALANCE]</span>
+        <span class="balance" style="font-size: inherit; margin: 0; animation: none;">0.0000 SOL</span>
+        <span class="ansi-yellow">AVAILABLE FOR TRANSACTIONS</span>
+    </div>
+    <div class="log-entry">
+        <span class="log-timestamp ansi-cyan">[15:42:11]</span>
+        <span class="log-level info ansi-cyan">[TWITTER]</span>
+        <span>MONITORING MENTIONS @shoovo</span>
+    </div>
+</div>
+
+<h2>> PROTOCOL USAGE</h2>
+
+<div class="terminal-log">
+    <div class="log-entry">
+        <span class="ansi-magenta">[STEP_01]</span>
+        <span class="ansi-green">TWEET_COMMAND_INTERFACE</span>
+    </div>
+    <div style="margin: 12px 0; padding-left: 20px;">
+        <p>MENTION BOT WITH PAYMENT SYNTAX:</p>
+        <code onclick="navigator.clipboard?.writeText(this.textContent)" title="Click to copy">
+            @shoovo send 0.5 SOL to @friend
+        </code>
+        <br><br>
+        <code onclick="navigator.clipboard?.writeText(this.textContent)" title="Click to copy">
+            @shoovo send 1.25 to @alice
+        </code>
+        <div class="prompt" style="margin-top: 12px;">
+            <span class="ansi-cyan">SUPPORTED_FORMATS:</span>
+            <span class="ansi-yellow">[@shoovo] [send] [AMOUNT] [SOL] [to] [@USER]</span>
+            <span class="cursor-blink">█</span>
+        </div>
+    </div>
+</div>
+
+<div class="terminal-log">
+    <div class="log-entry">
+        <span class="ansi-magenta">[STEP_02]</span>
+        <span class="ansi-yellow">TRANSACTION_PROCESSING</span>
+    </div>
+    <div style="margin: 12px 0; padding-left: 20px;">
+        <div class="log-entry">
+            <span class="ansi-green">✓</span>
+            <span>COMMAND_VALIDATION</span>
+        </div>
+        <div class="log-entry">
+            <span class="ansi-green">✓</span>
+            <span>WALLET_LOOKUP</span>
+        </div>
+        <div class="log-entry">
+            <span class="ansi-green">✓</span>
+            <span>BALANCE_VERIFICATION</span>
+        </div>
+        <div class="log-entry">
+            <span class="ansi-green">✓</span>
+            <span>BLOCKCHAIN_EXECUTION</span>
+        </div>
+        <div class="log-entry">
+            <span class="ansi-green">✓</span>
+            <span>TRANSACTION_CONFIRMATION</span>
+        </div>
+    </div>
+</div>
+
+<div class="terminal-log">
+    <div class="log-entry">
+        <span class="ansi-magenta">[STEP_03]</span>
+        <span class="ansi-cyan">RESPONSE_PROTOCOL</span>
+    </div>
+    <div style="margin: 12px 0; padding-left: 20px;">
+        <div class="log-entry">
+            <span class="ansi-green">[SUCCESS]</span>
+            <span>SOLSCAN_LINK + CONFIRMATION_MESSAGE</span>
+        </div>
+        <div class="log-entry">
+            <span class="ansi-red">[ERROR]</span>
+            <span>DETAILED_ERROR_MESSAGE + TROUBLESHOOTING</span>
+        </div>
+    </div>
+</div>
+
+<h2>> SYSTEM STATUS</h2>
+
+<div class="terminal-log">
+    <div class="log-entry">
+        <span class="ansi-yellow">[WARNING]</span>
+        <span class="ansi-red">PAYMENT_SYSTEM_ACTIVE</span>
+        <span>- SOLANA BLOCKCHAIN NETWORK</span>
+    </div>
+    <div class="log-entry">
+        <span class="ansi-cyan">[INFO]</span>
+        <span>REGISTERED_WALLETS: NONE - USERS_MUST_REGISTER</span>
+    </div>
+    <div class="log-entry">
+        <span class="ansi-cyan">[INFO]</span>
+        <span>MENTION_SCAN_INTERVAL: 60_SECONDS</span>
+    </div>
+    <div class="log-entry">
+        <span class="ansi-green">[SECURITY]</span>
+        <span>ALL_TRANSACTIONS_LOGGED + IDEMPOTENCY_ENABLED</span>
+    </div>
+    <div class="log-entry">
+        <span class="ansi-magenta">[MONITOR]</span>
+        <span>TRANSACTION_HISTORY: <a href="transactions.html" class="ansi-cyan">VIEW_LOGS</a></span>
+    </div>
+    <div class="log-entry">
+        <span class="ansi-magenta">[STATS]</span>
+        <span>USER_RANKINGS: <a href="leaderboard.html" class="ansi-yellow">VIEW_LEADERBOARD</a></span>
+    </div>
+</div>
+
+<h2>> INITIATE PAYMENT SEQUENCE</h2>
+
+<div class="prompt">
+    <span class="ansi-cyan">READY_FOR_COMMANDS</span>
+    <span class="ansi-green">|</span>
+    <span class="ansi-magenta">AWAITING_TWITTER_MENTIONS</span>
+    <span class="cursor-blink">█</span>
+</div>
+
+<div style="text-align: center; margin-top: 32px; padding: 20px; border: 1px solid var(--border-cyan); border-radius: 4px; background: rgba(0, 255, 255, 0.05);">
+    <p class="ansi-cyan">EXECUTE PAYMENT COMMAND VIA TWITTER MENTION</p>
+    <p class="ansi-green">MONITOR REAL-TIME TRANSACTION LOGS</p>
+    <p class="ansi-yellow">ACCESS ADVANCED TERMINAL INTERFACE</p>
+</div>
+
+            </div>
+        </div>
+        
+        <div class="footer">
+            <span class="ansi-green">[SHOOVO]</span> 
+            <span class="ansi-cyan">SOLANA PAYMENT PROTOCOL</span> 
+            <span class="ansi-magenta">|</span> 
+            <span class="ansi-yellow">TWITTER INTEGRATION</span>
+            <span class="ansi-magenta">|</span>
+            <span class="ansi-red">BLOCKCHAIN NETWORK</span>
+            <span class="ansi-magenta">|</span>
+            <a href="https://x.com/justshoovo" target="_blank" class="ansi-cyan" style="text-decoration: none; transition: all 0.3s ease;">@JUSTSHOOVO</a>
+        </div>
+    </div>
+
+    <script>
+        // Matrix Rain Effect
+        function createMatrixRain() {
+            const matrixBg = document.getElementById('matrixBg');
+            const chars = '01ABCDEF!@#$%^&*()_+-=[]{}|;:,.<>?';
+            const columns = Math.floor(window.innerWidth / 20);
+            
+            for (let i = 0; i < columns; i++) {
+                const column = document.createElement('div');
+                column.className = 'matrix-column';
+                column.style.left = i * 20 + 'px';
+                column.style.animationDuration = (Math.random() * 3 + 2) + 's';
+                column.style.animationDelay = Math.random() * 2 + 's';
+                
+                let text = '';
+                for (let j = 0; j < 20; j++) {
+                    text += chars[Math.floor(Math.random() * chars.length)] + '\n';
+                }
+                column.textContent = text;
+                
+                matrixBg.appendChild(column);
+                
+                // Remove and recreate after animation
+                setTimeout(() => {
+                    if (column.parentNode) {
+                        column.parentNode.removeChild(column);
+                    }
+                }, 5000);
+            }
+        }
+
+        // Live Data Updates
+        function updateLiveStats() {
+            fetch('/api/stats')
+                .then(response => response.json())
+                .then(data => {
+                    const balanceEl = document.getElementById('balanceDisplay');
+                    const networkEl = document.getElementById('networkStatus');
+                    
+                    if (balanceEl) {
+                        const oldBalance = balanceEl.textContent;
+                        balanceEl.textContent = (data.bot_balance || 0).toFixed(4);
+                        
+                        if (oldBalance !== balanceEl.textContent) {
+                            balanceEl.classList.add('glitch-text');
+                            setTimeout(() => balanceEl.classList.remove('glitch-text'), 300);
+                        }
+                    }
+                    
+                    if (networkEl && data.status === 'online') {
+                        networkEl.innerHTML = '<span class="ansi-green">●</span><span style="font-size: 10px;">ONLINE</span>';
+                    }
+                })
+                .catch(() => {
+                    const networkEl = document.getElementById('networkStatus');
+                    if (networkEl) {
+                        networkEl.innerHTML = '<span class="ansi-red">●</span><span style="font-size: 10px;">OFFLINE</span>';
+                    }
+                });
+        }
+
+        // Create Network Nodes
+        function createNetworkNodes() {
+            const container = document.querySelector('.container');
+            for (let i = 0; i < 15; i++) {
+                const node = document.createElement('div');
+                node.className = 'network-node';
+                node.style.left = Math.random() * 100 + '%';
+                node.style.top = Math.random() * 100 + '%';
+                node.style.animationDelay = Math.random() * 8 + 's';
+                container.appendChild(node);
+            }
+        }
+
+        // Create Data Streams
+        function createDataStreams() {
+            const container = document.querySelector('.container');
+            for (let i = 0; i < 8; i++) {
+                const stream = document.createElement('div');
+                stream.className = 'data-stream';
+                stream.style.top = Math.random() * 100 + '%';
+                stream.style.animationDelay = Math.random() * 3 + 's';
+                stream.style.animationDuration = (Math.random() * 2 + 3) + 's';
+                container.appendChild(stream);
+            }
+        }
+
+        // Terminal Typing Effect
+        function typeText(element, text, speed = 50) {
+            let i = 0;
+            element.innerHTML = '';
+            const timer = setInterval(() => {
+                if (i < text.length) {
+                    element.innerHTML += text.charAt(i);
+                    i++;
+                } else {
+                    clearInterval(timer);
+                }
+            }, speed);
+        }
+
+        // Copy to Clipboard with Effect
+        function copyToClipboard(text, element) {
+            if (navigator.clipboard) {
+                navigator.clipboard.writeText(text).then(() => {
+                    const originalText = element.textContent;
+                    element.textContent = 'COPIED!';
+                    element.classList.add('glitch-text');
+                    
+                    setTimeout(() => {
+                        element.textContent = originalText;
+                        element.classList.remove('glitch-text');
+                    }, 1000);
+                });
+            }
+        }
+
+        // Enhanced Click Effects
+        document.addEventListener('click', function(e) {
+            if (e.target.tagName === 'CODE' || e.target.closest('code')) {
+                const codeEl = e.target.tagName === 'CODE' ? e.target : e.target.closest('code');
+                copyToClipboard(codeEl.textContent, codeEl);
+            }
+            
+            // Create ripple effect
+            const ripple = document.createElement('div');
+            ripple.style.position = 'absolute';
+            ripple.style.borderRadius = '50%';
+            ripple.style.background = 'rgba(0, 255, 65, 0.5)';
+            ripple.style.transform = 'scale(0)';
+            ripple.style.animation = 'ripple 0.6s linear';
+            ripple.style.left = e.clientX - 5 + 'px';
+            ripple.style.top = e.clientY - 5 + 'px';
+            ripple.style.width = '10px';
+            ripple.style.height = '10px';
+            ripple.style.pointerEvents = 'none';
+            ripple.style.zIndex = '9999';
+            
+            document.body.appendChild(ripple);
+            setTimeout(() => ripple.remove(), 600);
+        });
+
+        // Glitch Effect for Errors
+        function triggerGlitch(element) {
+            element.classList.add('glitch-text');
+            setTimeout(() => element.classList.remove('glitch-text'), 300);
+        }
+
+        // Wallet Connection
+        let walletConnected = false;
+        let userWallet = null;
+
+        async function connectWallet() {
+            try {
+                if (window.solana && window.solana.isPhantom) {
+                    const response = await window.solana.connect();
+                    userWallet = response.publicKey.toString();
+                    walletConnected = true;
+                    updateWalletStatus();
+                    return userWallet;
+                } else {
+                    alert('Please install Phantom wallet extension');
+                    return null;
+                }
+            } catch (error) {
+                console.error('Wallet connection failed:', error);
+                return null;
+            }
+        }
+
+        async function disconnectWallet() {
+            if (window.solana) {
+                await window.solana.disconnect();
+                walletConnected = false;
+                userWallet = null;
+                updateWalletStatus();
+            }
+        }
+
+        function updateWalletStatus() {
+            const connectBtn = document.getElementById('connectWallet');
+            const walletStatus = document.getElementById('walletStatus');
+            const walletAddress = document.getElementById('walletAddress');
+            
+            if (connectBtn) {
+                if (walletConnected) {
+                    connectBtn.textContent = 'DISCONNECT_WALLET';
+                    connectBtn.onclick = disconnectWallet;
+                } else {
+                    connectBtn.textContent = 'CONNECT_WALLET';
+                    connectBtn.onclick = connectWallet;
+                }
+            }
+            
+            if (walletStatus) {
+                walletStatus.textContent = walletConnected ? 'CONNECTED' : 'DISCONNECTED';
+                walletStatus.className = walletConnected ? 'ansi-green' : 'ansi-red';
+            }
+            
+            if (walletAddress) {
+                walletAddress.textContent = walletConnected ? 
+                    userWallet.substring(0, 8) + '...' + userWallet.substring(userWallet.length - 8) : 
+                    'NO_WALLET_CONNECTED';
+            }
+        }
+
+        // Initialize Effects
+        document.addEventListener('DOMContentLoaded', function() {
+            createMatrixRain();
+            createNetworkNodes();
+            createDataStreams();
+            updateLiveStats();
+            updateWalletStatus();
+            
+            // Auto-connect if previously connected
+            if (window.solana && window.solana.isConnected) {
+                connectWallet();
+            }
+            
+            // Update live stats every 30 seconds
+            setInterval(updateLiveStats, 30000);
+            
+            // Refresh matrix rain periodically
+            setInterval(createMatrixRain, 15000);
+            
+            // Add typing effects to prompts
+            document.querySelectorAll('.prompt').forEach(prompt => {
+                const text = prompt.textContent;
+                if (text.length > 20) {
+                    typeText(prompt, text, 30);
+                }
+            });
+        });
+
+        // Add ripple animation
+        const style = document.createElement('style');
+        style.textContent = `
+            @keyframes ripple {
+                0% { transform: scale(0); opacity: 1; }
+                100% { transform: scale(4); opacity: 0; }
+            }
+        `;
+        document.head.appendChild(style);
+    </script>
+</body>
+</html>
