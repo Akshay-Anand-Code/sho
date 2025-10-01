@@ -3,7 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>SHOOVO</title>
+    <title>Groovo</title>
+    <link rel="icon" type="image/jpeg" href="groovo.jpg">
     <style>
         @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@300;400;500;600;700&display=swap');
         
@@ -450,6 +451,30 @@
         .header-ascii {
             text-align: center;
             margin-bottom: 32px;
+            position: relative;
+        }
+
+        .header-links {
+            position: absolute;
+            top: 0;
+            right: 0;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .header-links a {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            height: 26px;
+            padding: 0 6px;
+            background: var(--bg-elevated);
+            border: 1px solid var(--border-neon);
+            border-radius: 2px;
+            color: var(--fg-primary);
+            text-decoration: none;
+            box-shadow: 0 0 10px rgba(125, 211, 252, 0.15);
         }
 
         .ascii-art {
@@ -822,15 +847,28 @@
     
     <div class="container">
         <div class="header-ascii">
+            <div class="header-links">
+                <a href="https://x.com/groovodotfun" target="_blank" rel="noopener noreferrer" title="Twitter/X" style="width: 26px; padding: 0;">
+                    <svg viewBox="0 0 24 24" width="14" height="14" fill="currentColor" aria-hidden="true">
+                        <path d="M18.244 2.25h3.308l-7.227 8.26 8.487 11.24H16.17l-5.34-6.98-6.104 6.98H1.417l7.735-8.85L1 2.25h6.09l4.82 6.39 6.334-6.39zm-1.158 19.5h1.833L7.01 4.637H5.06l12.026 17.113z"></path>
+                    </svg>
+                </a>
+                <a href="https://shrume.gitbook.io/groovo-docs-1/" target="_blank" rel="noopener noreferrer" title="GitBook Docs">
+                    <svg viewBox="0 0 24 24" width="14" height="14" fill="currentColor" aria-hidden="true" style="margin-right: 6px;">
+                        <path d="M3 5.25A2.25 2.25 0 0 1 5.25 3H19a2 2 0 0 1 2 2v12.75a3.75 3.75 0 0 0-3.75-3.75H7A2 2 0 0 0 5 16v3.75H5a2 2 0 0 1-2-2V5.25zm4 12.75V16a.5.5 0 0 1 .5-.5h10.75A2.25 2.25 0 0 1 20.5 17.75V5a.5.5 0 0 0-.5-.5H5.25a.75.75 0 0 0-.75.75v12.5c0 .276.224.5.5.5H7zm0 0H18.5a.5.5 0 0 1 .5.5v.5a.5.5 0 0 1-.5.5H7a.5.5 0 0 1-.5-.5v-.5a.5.5 0 0 1 .5-.5z"></path>
+                    </svg>
+                    <span style="font-size: 10px; letter-spacing: 0.5px;">DOCS</span>
+                </a>
+            </div>
             <pre class="ascii-art">
-███████ ██   ██  ██████   ██████  ██    ██  ██████  
-██      ██   ██ ██    ██ ██    ██ ██    ██ ██    ██ 
-███████ ███████ ██    ██ ██    ██ ██    ██ ██    ██ 
-     ██ ██   ██ ██    ██ ██    ██  ██  ██  ██    ██ 
-███████ ██   ██  ██████   ██████    ████    ██████  
+                ██████  ██████   ██████   ██████  ██    ██  ██████  
+                ██       ██   ██ ██    ██ ██    ██ ██    ██ ██    ██ 
+                ██   ███ ██████  ██    ██ ██    ██ ██    ██ ██    ██ 
+                ██    ██ ██   ██ ██    ██ ██    ██  ██  ██  ██    ██ 
+                 ██████  ██   ██  ██████   ██████    ████    ██████ 
             </pre>
             <div class="prompt">
-                INITIALIZING SHOOVO PAYMENT PROTOCOL...
+                INITIALIZING Groovo PAYMENT PROTOCOL...
                 <span class="cursor-blink">█</span>
             </div>
         </div>
@@ -860,7 +898,7 @@
                     <div class="terminal-dot"></div>
                     <div class="terminal-dot"></div>
                 </div>
-                <div class="terminal-title">SHOOVO_v2.1.0</div>
+                <div class="terminal-title">Groovo_v2.1.0</div>
                 <div style="margin-left: auto; display: flex; align-items: center; gap: 16px;">
                     <div class="network-status" id="networkStatus">
                         <span class="ansi-green">●</span>
@@ -884,7 +922,7 @@
     <div class="log-entry">
         <span class="log-timestamp ansi-cyan">[15:42:08]</span>
         <span class="log-level success ansi-green">[SYSTEM]</span>
-        <span>SHOOVO_v2.1.0 INITIALIZED</span>
+        <span>Groovo_v2.1.0 INITIALIZED</span>
     </div>
     <div class="log-entry">
         <span class="log-timestamp ansi-cyan">[15:42:10]</span>
@@ -895,7 +933,7 @@
     <div class="log-entry">
         <span class="log-timestamp ansi-cyan">[15:42:11]</span>
         <span class="log-level info ansi-cyan">[TWITTER]</span>
-        <span>MONITORING MENTIONS @shoovo</span>
+        <span>MONITORING MENTIONS @Groovo</span>
     </div>
 </div>
 
@@ -909,15 +947,15 @@
     <div style="margin: 12px 0; padding-left: 20px;">
         <p>MENTION BOT WITH PAYMENT SYNTAX:</p>
         <code onclick="navigator.clipboard?.writeText(this.textContent)" title="Click to copy">
-            @shoovo send 0.5 SOL to @friend
+            @Groovo send 0.5 SOL to @friend
         </code>
         <br><br>
         <code onclick="navigator.clipboard?.writeText(this.textContent)" title="Click to copy">
-            @shoovo send 1.25 to @alice
+            @Groovo send 1.25 to @alice
         </code>
         <div class="prompt" style="margin-top: 12px;">
             <span class="ansi-cyan">SUPPORTED_FORMATS:</span>
-            <span class="ansi-yellow">[@shoovo] [send] [AMOUNT] [SOL] [to] [@USER]</span>
+            <span class="ansi-yellow">[@Groovo] [send] [AMOUNT] [SOL] [to] [@USER]</span>
             <span class="cursor-blink">█</span>
         </div>
     </div>
@@ -1018,14 +1056,14 @@
         </div>
         
         <div class="footer">
-            <span class="ansi-green">[SHOOVO]</span> 
+            <span class="ansi-green">[Groovo]</span> 
             <span class="ansi-cyan">SOLANA PAYMENT PROTOCOL</span> 
             <span class="ansi-magenta">|</span> 
             <span class="ansi-yellow">TWITTER INTEGRATION</span>
             <span class="ansi-magenta">|</span>
             <span class="ansi-red">BLOCKCHAIN NETWORK</span>
             <span class="ansi-magenta">|</span>
-            <a href="https://x.com/justshoovo" target="_blank" class="ansi-cyan" style="text-decoration: none; transition: all 0.3s ease;">@JUSTSHOOVO</a>
+            <a href="https://x.com/justGroovo" target="_blank" class="ansi-cyan" style="text-decoration: none; transition: all 0.3s ease;">@JUSTGroovo</a>
         </div>
     </div>
 
